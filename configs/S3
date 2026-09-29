@@ -1,0 +1,75 @@
+
+enable
+configure terminal
+
+hostname S3
+no ip domain-lookup
+service password-encryption
+enable secret class
+
+banner motd #Unauthorized access is prohibited#
+
+line console 0
+ logging synchronous
+ password cisco
+ login
+exit
+
+line vty 0 15
+ logging synchronous
+ password cisco
+ login
+exit
+
+!
+! VLAN CONFIGURATION
+!
+vlan 10
+ name User
+exit
+
+vlan 99
+ name Management
+exit
+
+!
+! ACCESS PORT
+!
+interface fastethernet0/18
+ description PC-C
+ switchport mode access
+ switchport access vlan 10
+ no shutdown
+exit
+
+!
+! TRUNK PORTS
+!
+interface range fastethernet0/1, fastethernet0/3
+ description Inter-switch trunk
+ switchport mode trunk
+ switchport trunk native vlan 99
+ no shutdown
+exit
+
+!
+! MANAGEMENT SVI
+!
+interface vlan 99
+ description Management
+ ip address 192.168.1.13 255.255.255.0
+ no shutdown
+exit
+
+!
+! SPANNING TREE
+!
+spanning-tree mode rapid-pvst
+spanning-tree portfast default
+spanning-tree portfast bpduguard default
+
+!
+! SAVE CONFIGURATION
+!
+end
+copy running-config startup-config
